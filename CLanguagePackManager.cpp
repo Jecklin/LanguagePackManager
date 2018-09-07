@@ -9,32 +9,72 @@
 
 CLanguagePackManager::CLanguagePackManager()
 {
+    //The default language pack is English
+    this->ReadJson(ELanguage::English);
     
 }
 
 CLanguagePackManager::~CLanguagePackManager()
 {
-    
+    ;
 }
 
-void CLanguagePackManager::SwitchLanguage(int LID)
+void CLanguagePackManager::SwitchLanguage(ELanguage language)
 {
-    
+    this->ReadJson(language);
 }
 
 QString CLanguagePackManager::GetValue(QString key)
 {
-    QString result;
-    result = this->m_hash.value(key);
+    QString result = "";
+    QHash<QString, QString>::const_iterator iter = this->m_hash.constBegin();
+    while (iter != this->m_hash.constEnd())
+    {
+        if (iter.key() == key)
+        {
+            result = iter.value();
+        }
+    }
+    
     return result;
 }
 
-bool CLanguagePackManager::ReadJson(int LID)
+void CLanguagePackManager::Test()
+{
+    QHash<QString,QString>::const_iterator iter = this->m_hash.constBegin();
+    while (iter != this->m_hash.constEnd())
+    {
+        qDebug() << "key:" << iter.key() << ": "
+                 << "value:" << iter.value();
+        ++iter;
+    }
+}
+
+bool CLanguagePackManager::ReadJson(ELanguage language)
 {
     bool result = false;
     do
     {
-        //todo: 根据输入的LID打开JSON
+        //todo: 根据输入的language打开JSON
+        QString fileName;
+        if (language == ELanguage::English)
+        {
+            fileName = "English.json";
+        }
+        else if (language == ELanguage::Chinese)
+        {
+            fileName = "Chinese.json";
+        }
+        else if (language == ELanguage::Japanese)
+        {
+            fileName = "Japanese.json";
+        }
+        else if (language == ELanguage::Spanish)
+        {
+            fileName = "Spanish.json";
+        }
+        
+        
         QFile loadFile("1.json");
         if (!loadFile.open(QIODevice::ReadOnly))
         {
@@ -65,8 +105,13 @@ bool CLanguagePackManager::ReadJson(int LID)
                     }
 
                 }
+                
+                result = true;
             }
         }
+        
+        //test
+        this->Test();
         
         
     }while(false);

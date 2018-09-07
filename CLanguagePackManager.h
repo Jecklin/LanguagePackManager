@@ -10,12 +10,21 @@ public:
     CLanguagePackManager();
     ~CLanguagePackManager();
     
-    void    SwitchLanguage(int LID);
+    enum ELanguage
+    {
+        English     ,
+        Chinese     ,
+        Japanese    ,
+        Spanish
+    };
+    
+    void    SwitchLanguage(ELanguage language);
     QString GetValue(QString key);
     
 private:
-    bool    ReadJson(int LID);
-    
+    bool    ReadJson(ELanguage language);
+    //test
+    void    Test();
     
 private:
     QHash<QString, QString> m_hash;
