@@ -23,6 +23,7 @@ public:
     
 private:
     bool    ReadJson(ELanguage language);
+    
     //test
     void    Test();
     

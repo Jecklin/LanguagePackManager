@@ -55,27 +55,29 @@ bool CLanguagePackManager::ReadJson(ELanguage language)
     bool result = false;
     do
     {
-        //todo: 根据输入的language打开JSON
+        //Open the file according to the language you entered
         QString fileName;
-        if (language == ELanguage::English)
+        switch (language)
+        {
+        case    ELanguage::English:
         {
             fileName = "English.json";
-        }
-        else if (language == ELanguage::Chinese)
+        }break;
+        case    ELanguage::Chinese:
         {
             fileName = "Chinese.json";
-        }
-        else if (language == ELanguage::Japanese)
+        }break;
+        case    ELanguage::Japanese:
         {
             fileName = "Japanese.json";
-        }
-        else if (language == ELanguage::Spanish)
+        }break;
+        case    ELanguage::Spanish:
         {
             fileName = "Spanish.json";
         }
         
         
-        QFile loadFile("1.json");
+        QFile loadFile(language);
         if (!loadFile.open(QIODevice::ReadOnly))
         {
             qDebug() << "could't open projects json";
