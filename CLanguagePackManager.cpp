@@ -56,28 +56,32 @@ bool CLanguagePackManager::ReadJson(ELanguage language)
     do
     {
         //Open the file according to the language you entered
-        QString fileName;
+        QString dir = "../LanguagePackManager/";
+        QString fileName = dir;
+        
         switch (language)
         {
         case    ELanguage::English:
         {
-            fileName = "English.json";
+            fileName += "English.json";
         }break;
         case    ELanguage::Chinese:
         {
-            fileName = "Chinese.json";
+            fileName += "Chinese.json";
         }break;
         case    ELanguage::Japanese:
         {
-            fileName = "Japanese.json";
+            fileName += "Japanese.json";
         }break;
         case    ELanguage::Spanish:
         {
-            fileName = "Spanish.json";
+            fileName += "Spanish.json";
         }
+        }
+        qDebug() << fileName;
+            
         
-        
-        QFile loadFile(language);
+        QFile loadFile(fileName);
         if (!loadFile.open(QIODevice::ReadOnly))
         {
             qDebug() << "could't open projects json";
@@ -88,25 +92,40 @@ bool CLanguagePackManager::ReadJson(ELanguage language)
         loadFile.close();
         
         QJsonParseError jsonError;
-        QJsonDocument   document = QJsonDocument::fromJson(allData, &json_error);
+        QJsonDocument   document = QJsonDocument::fromJson(allData, &jsonError);
         QStringList     keys     = document.object().keys();
         
         if (!document.isNull() && (jsonError.error == QJsonParseError::NoError))
         {
-            if (document.isArray())
+            if (document.isObject())
             { 
-                QJsonArray array = document.array();
-                int size = array.size();
+                QJsonObject object   = document.object();
+                int size             = keys.size();
                 for (int i = 0; i < size; ++i)
                 {
-                    QJsonValue key = keys.at(i);
-                    QJsonValue value = array.at(i);
-                    if (key.type() == QJsonValue::String && value.type() == QJsonValue::String)
+                    QString strKey = keys.at(i);
+                    if (object.contains(strKey))
                     {
-                        this->m_hash.insert(key, value);
+                        QJsonValue value = object.value(strKey);
+                        if (value.isArray())
+                        {
+                            QJsonArray array = value.toArray();
+                            int arrSize = array.size();
+                            for (int i = 0; i < arrSize; ++i)
+                            {
+                                QJsonValue value = array.at(i);
+                                QString strValue = value.toString();
+                                this->m_hash.insert(strKey, strValue);
+                                
+                                qDebug() << "strKey:" << strKey 
+                                         << "strValue:" << strValue;
+                            }  
+                            
+                        }
                     }
-
+                    
                 }
+                
                 
                 result = true;
             }
@@ -117,18 +136,7 @@ bool CLanguagePackManager::ReadJson(ELanguage language)
         
         
     }while(false);
-
+    
     return result;
 }
-
-
-
-
-
-
-
-
-
-
-
 

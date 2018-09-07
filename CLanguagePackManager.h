@@ -21,11 +21,13 @@ public:
     void    SwitchLanguage(ELanguage language);
     QString GetValue(QString key);
     
+    //test
+    void    Test();
+    
 private:
     bool    ReadJson(ELanguage language);
     
-    //test
-    void    Test();
+
     
 private:
     QHash<QString, QString> m_hash;
