@@ -6,6 +6,7 @@
 #include <QJsonArray>
 #include <QFile>
 #include <QDebug>
+#include <QStringList>
 
 CLanguagePackManager::CLanguagePackManager()
 {
@@ -21,31 +22,47 @@ CLanguagePackManager::~CLanguagePackManager()
 
 void CLanguagePackManager::SwitchLanguage(ELanguage language)
 {
-    this->ReadJson(language);
+    bool flag = this->ReadJson(language);
+    qDebug() << "ReadJson:" << flag;
 }
 
-QString CLanguagePackManager::GetValue(QString key)
+QStringList CLanguagePackManager::GetValue(QString key)
 {
-    QString result = "";
-    QHash<QString, QString>::const_iterator iter = this->m_hash.constBegin();
+    QStringList valueList;
+
+    QHash<QString, QStringList>::const_iterator iter = this->m_hash.constBegin();
     while (iter != this->m_hash.constEnd())
     {
-        if (iter.key() == key)
+        QString hashKey = iter.key();
+        if (hashKey == key)
         {
-            result = iter.value();
+            valueList = iter.value();
         }
+
+        ++iter;
     }
     
-    return result;
+    return valueList;
 }
 
 void CLanguagePackManager::Test()
 {
-    QHash<QString,QString>::const_iterator iter = this->m_hash.constBegin();
+    QHash<QString,QStringList>::const_iterator iter = this->m_hash.constBegin();
     while (iter != this->m_hash.constEnd())
     {
-        qDebug() << "key:" << iter.key() << ": "
-                 << "value:" << iter.value();
+        
+        QString     key       = iter.key();
+        QStringList valueList = iter.value();
+        
+        qDebug() << "key:" << key << ": ";
+        
+        QStringList::const_iterator listIter = valueList.begin();
+        while (listIter != valueList.end())
+        {
+            qDebug() << "value:" << *listIter;
+            ++listIter;
+        }
+          
         ++iter;
     }
 }
@@ -57,31 +74,33 @@ bool CLanguagePackManager::ReadJson(ELanguage language)
     {
         //Open the file according to the language you entered
         QString dir = "../LanguagePackManager/";
-        QString fileName = dir;
+        QString fileName;
         
         switch (language)
         {
         case    ELanguage::English:
         {
-            fileName += "English.json";
+            fileName = "English.json";
         }break;
         case    ELanguage::Chinese:
         {
-            fileName += "Chinese.json";
+            fileName = "Chinese.json";
         }break;
         case    ELanguage::Japanese:
         {
-            fileName += "Japanese.json";
+            fileName = "Japanese.json";
         }break;
         case    ELanguage::Spanish:
         {
-            fileName += "Spanish.json";
+            fileName = "Spanish.json";
         }
         }
         qDebug() << fileName;
+        
+        dir += fileName;
             
         
-        QFile loadFile(fileName);
+        QFile loadFile(dir);
         if (!loadFile.open(QIODevice::ReadOnly))
         {
             qDebug() << "could't open projects json";
@@ -92,44 +111,60 @@ bool CLanguagePackManager::ReadJson(ELanguage language)
         loadFile.close();
         
         QJsonParseError jsonError;
-        QJsonDocument   document = QJsonDocument::fromJson(allData, &jsonError);
-        QStringList     keys     = document.object().keys();
+        QJsonDocument   document    = QJsonDocument::fromJson(allData, &jsonError);
+        QStringList     keys        = document.object().keys();
+        QStringList     indexList;
+        QHash<QString, QStringList> indexHash;
         
-        if (!document.isNull() && (jsonError.error == QJsonParseError::NoError))
+        if (document.isNull() || (jsonError.error != QJsonParseError::NoError))
         {
-            if (document.isObject())
-            { 
-                QJsonObject object   = document.object();
-                int size             = keys.size();
-                for (int i = 0; i < size; ++i)
+            qDebug() << "document error";
+            break;
+        }
+        
+        if (!document.isObject())
+        {
+            qDebug() << "document is not object";
+            break;
+        }
+        
+        QJsonObject object      = document.object();
+        int         keySize     = keys.size();
+        qDebug() << "keySize: " << keySize;
+        
+        for (int i = 0; i < keySize; ++i)
+        {
+            QString strKey = keys.at(i);
+            indexList.clear();
+            
+            if (object.contains(strKey))
+            {
+                QJsonValue value = object.value(strKey);
+                if (value.isArray())
                 {
-                    QString strKey = keys.at(i);
-                    if (object.contains(strKey))
+                    QJsonArray array = value.toArray();
+                    int arrSize = array.size();
+                    for (int i = 0; i < arrSize; ++i)
                     {
-                        QJsonValue value = object.value(strKey);
-                        if (value.isArray())
+                        QJsonValue  arrValue = array.at(i);
+                        if (arrValue.isString())
                         {
-                            QJsonArray array = value.toArray();
-                            int arrSize = array.size();
-                            for (int i = 0; i < arrSize; ++i)
-                            {
-                                QJsonValue value = array.at(i);
-                                QString strValue = value.toString();
-                                this->m_hash.insert(strKey, strValue);
-                                
-                                qDebug() << "strKey:" << strKey 
-                                         << "strValue:" << strValue;
-                            }  
-                            
+                            QString  strValue = arrValue.toString();
+                            indexList.push_back(strValue);
                         }
+                        
                     }
                     
                 }
                 
-                
-                result = true;
+                indexHash.insert(strKey, indexList);
             }
+            
+            
         }
+
+        this->m_hash = indexHash;
+        result = true;
         
         //test
         this->Test();

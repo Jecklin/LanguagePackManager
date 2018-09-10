@@ -18,19 +18,19 @@ public:
         Spanish
     };
     
-    void    SwitchLanguage(ELanguage language);
-    QString GetValue(QString key);
+    void            SwitchLanguage(ELanguage language);
+    QStringList     GetValue(QString key);
     
     //test
-    void    Test();
+    void            Test();
     
 private:
-    bool    ReadJson(ELanguage language);
+    bool            ReadJson(ELanguage language);
     
 
     
 private:
-    QHash<QString, QString> m_hash;
+    QHash<QString, QStringList> m_hash;
 };
 
 #endif // CLANGUAGEPACKMANAGER_H
