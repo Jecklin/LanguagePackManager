@@ -23,7 +23,7 @@ CLanguagePackManager::~CLanguagePackManager()
 void CLanguagePackManager::SwitchLanguage(ELanguage language)
 {
     bool flag = this->ReadJson(language);
-    qDebug() << "ReadJson:" << flag;
+    qDebug() << "123123123:" << flag;
 }
 
 QStringList CLanguagePackManager::GetValue(QString key)
