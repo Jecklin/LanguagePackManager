@@ -1,4 +1,4 @@
-﻿#include "CLanguagePackManager.h"
+﻿#include "CLanguagePackManger2.h"
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -6,6 +6,7 @@
 #include <QJsonArray>
 #include <QFile>
 #include <QDebug>
+#include <QStringList>
 
 CLanguagePackManager::CLanguagePackManager()
 {
@@ -19,44 +20,51 @@ CLanguagePackManager::~CLanguagePackManager()
     ;
 }
 
-bool CLanguagePackManager::SwitchLanguage(ELanguage language)
+void CLanguagePackManager::SwitchLanguage(ELanguage language)
 {
     bool flag = this->ReadJson(language);
-    qDebug() << "ReadJson" << flag;
-    return flag;
+    qDebug() << "ReadJson:" << flag;
 }
 
-QString CLanguagePackManager::GetValue(QString key)
+QStringList CLanguagePackManager::GetValue(QString key)
 {
-    QString value;
+    QStringList valueList;
 
-    QHash<QString, QString>::const_iterator iter = this->m_hash.constBegin();
+    QHash<QString, QStringList>::const_iterator iter = this->m_hash.constBegin();
     while (iter != this->m_hash.constEnd())
     {
         QString hashKey = iter.key();
         if (hashKey == key)
         {
-            value = iter.value();
+            valueList = iter.value();
         }
 
         ++iter;
     }
     
-    return value;
+    return valueList;
 }
 
 void CLanguagePackManager::Test()
 {
-    QHash<QString,QString>::const_iterator iter = this->m_hash.constBegin();
+    QHash<QString,QStringList>::const_iterator iter = this->m_hash.constBegin();
     while (iter != this->m_hash.constEnd())
     {
+        
         QString     key       = iter.key();
-        QString     value     = iter.value();
+        QStringList valueList = iter.value();
         
-        qDebug() << "key:" << key << ": " << "value: " << value;
+        qDebug() << "key:" << key << ": ";
         
+        QStringList::const_iterator listIter = valueList.begin();
+        while (listIter != valueList.end())
+        {
+            qDebug() << "value:" << *listIter;
+            ++listIter;
+        }
+          
         ++iter;
-    }   
+    }
 }
 
 bool CLanguagePackManager::ReadJson(ELanguage language)
@@ -103,18 +111,14 @@ bool CLanguagePackManager::ReadJson(ELanguage language)
         loadFile.close();
         
         QJsonParseError jsonError;
-        QJsonDocument   document    = QJsonDocument::fromJson(allData, &jsonError); //函数说明：解析UTF-8编码的JSON文档并从中创建QJsonDocument。
+        QJsonDocument   document    = QJsonDocument::fromJson(allData, &jsonError);
         QStringList     keys        = document.object().keys();
-        QHash<QString, QString> indexHash;
+        QStringList     indexList;
+        QHash<QString, QStringList> indexHash;
         
         if (document.isNull() || (jsonError.error != QJsonParseError::NoError))
         {
             qDebug() << "document error";
-            break;
-        }
-        if (jsonError.error == QJsonParseError::IllegalUTF8String)                  //输入中出现非法UTF8序列
-        {
-            qDebug() << "An illegal UTF8 sequence occurred in the input";
             break;
         }
         
@@ -130,29 +134,45 @@ bool CLanguagePackManager::ReadJson(ELanguage language)
         
         for (int i = 0; i < keySize; ++i)
         {
-            QString strKey = keys.at(i); 
+            QString strKey = keys.at(i);
+            indexList.clear();
+            
             if (object.contains(strKey))
             {
                 QJsonValue value = object.value(strKey);
-                if (value.isString())
+                if (value.isArray())
                 {
-                    QString strValue = value.toString();
-                    indexHash.insert(strKey, strValue);  
+                    QJsonArray array = value.toArray();
+                    int arrSize = array.size();
+                    for (int i = 0; i < arrSize; ++i)
+                    {
+                        QJsonValue  arrValue = array.at(i);
+                        if (arrValue.isString())
+                        {
+                            QString  strValue = arrValue.toString();
+                            indexList.push_back(strValue);
+                        }
+                        
+                    }
+                    
                 }
- 
+                
+                indexHash.insert(strKey, indexList);
             }
-
+            
+            
         }
 
         this->m_hash = indexHash;
         result = true;
         
+        //test
+        this->Test();
         
         
     }while(false);
     
     return result;
 }
-
 
 

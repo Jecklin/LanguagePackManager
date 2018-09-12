@@ -2,22 +2,35 @@
 #include "CLanguagePackManager.h"
 #include <QDebug>
 
+#include <iostream>
+using namespace std;
+
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
     
+    //Use the help
     CLanguagePackManager manger;
-    manger.SwitchLanguage(CLanguagePackManager::Chinese);
+    
+    //change language
+    bool ok = manger.SwitchLanguage(CLanguagePackManager::Chinese);
+    qDebug() << "SwitchLanguage" << ok;
+    
+    //test
     manger.Test();
     
-    qDebug() << "GetValue():";
-    QStringList list = manger.GetValue("CUDlgToothInfo");
-    QStringList::const_iterator iter = list.constBegin();
-    while (iter != list.constEnd())
-    {
-        qDebug() << *iter;
-        ++iter;
-    }
+    //get the value of key
+    qDebug() << "***   GetValue():   ***";
+    
+    QString s1 = "1";
+    QString s2 = "2";
+    
+    QString key1 = manger.GetValue(s1);
+    QString key2 = manger.GetValue(s2);
+    
+    qDebug() << s1 << key1;
+    qDebug() << s2 << key2;
+
     
     return a.exec();
 }

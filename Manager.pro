@@ -10,7 +10,9 @@ CONFIG -= app_bundle
 TEMPLATE = app
 
 SOURCES += main.cpp \
-    CLanguagePackManager.cpp
+    CLanguagePackManager.cpp \
+    CLanguagePackManger2.cpp
 
 HEADERS += \
-    CLanguagePackManager.h
+    CLanguagePackManager.h \
+    CLanguagePackManger2.h
