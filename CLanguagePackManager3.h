@@ -1,15 +1,13 @@
-﻿#ifndef CLANGUAGEPACKMANAGER_H
-#define CLANGUAGEPACKMANAGER_H
+﻿#ifndef CLANGUAGEPACKMANAGER3_H
+#define CLANGUAGEPACKMANAGER3_H
 
 #include <QHash>
 
-////// *****************   visition 1: QHash<QString, QString>             ***************///
+////// *****************   visition 3: 单例模式            ***************///
 
 class CLanguagePackManager
 {
 public:
-    CLanguagePackManager();         //The default language pack is English
-    ~CLanguagePackManager();
     
     enum ELanguage
     {
@@ -19,7 +17,12 @@ public:
         Spanish
     };
     
-public:
+    ///
+    /// \brief getInstance
+    /// \return 
+    ///
+    static CLanguagePackManager* getInstance();
+    
     ///
     /// \brief SwitchLanguage : This function is used to switch languages
     /// \param language       : This parameter specifies the language you want to switch
@@ -32,39 +35,25 @@ public:
     /// \return               : Returns the value corresponding to the key
     ///
     QString         GetValue(QString key);
-    
-    
-    
+   
     //test
     void            Test();
     
-private:
-    bool            ReadJson(ELanguage language);
+ 
+private:  
+    CLanguagePackManager();         //The default language pack is English
+    ~CLanguagePackManager(); 
     
 
+    bool            ReadJson(ELanguage language);
+    void            InitLanguage();
+    
+    
     
 private:
-    QHash<QString, QString> m_hash;
+    QHash<QString, QString>         m_hash;
+    static CLanguagePackManager     m_manager;
 };
 
 
-#endif // CLANGUAGEPACKMANAGER_H
-
-
-////// *****************  save : QHash<QString, QStringList>               ***************///
-////// *****************  json :                                           ***************///
-//Chinese.json
-//{
-//    "1": "确定",
-//    "2":"取消"
-//}
-
-
-//English".json
-//{
-//    "1": "确定",
-//    "2":"取消"
-//}	
-
-/// 
-
+#endif // CLANGUAGEPACKMANAGER3_H

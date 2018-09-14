@@ -1,6 +1,4 @@
-﻿#include "CLanguagePackManager.h"
-
-
+﻿#include "CLanguagePackManager3.h"
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -9,19 +7,23 @@
 #include <QFile>
 #include <QDebug>
 
-#include <iostream>
-using namespace std;
+CLanguagePackManager CLanguagePackManager::m_manager;
 
 CLanguagePackManager::CLanguagePackManager()
+    :m_hash()
 {
     //The default language pack is English
-    this->ReadJson(ELanguage::English);
-    
+    this->InitLanguage();   
 }
 
 CLanguagePackManager::~CLanguagePackManager()
 {
     ;
+}
+
+CLanguagePackManager* CLanguagePackManager::getInstance()
+{
+    return &m_manager;
 }
 
 bool CLanguagePackManager::SwitchLanguage(ELanguage language)
@@ -70,9 +72,7 @@ bool CLanguagePackManager::ReadJson(ELanguage language)
     do
     {
         //Open the file according to the language you entered
-        //  "../" 上级目录
-        //  "./"  当前目录
-        QString dir = "../";   
+        QString dir = "../";
         QString fileName;
         
         switch (language)
@@ -106,11 +106,7 @@ bool CLanguagePackManager::ReadJson(ELanguage language)
             break;
         }
         
-        
         QByteArray allData = loadFile.readAll();
-        
-//        allData.toStdString();
-        
         loadFile.close();
         
         QJsonParseError jsonError;
@@ -163,6 +159,11 @@ bool CLanguagePackManager::ReadJson(ELanguage language)
     }while(false);
     
     return result;
+}
+
+void CLanguagePackManager::InitLanguage()
+{
+    this->ReadJson(ELanguage::English);
 }
 
 
